@@ -505,7 +505,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(port, "127.0.0.1", () => {
+server.listen(port, "0.0.0.0", () => {
   console.log(`AI 选品机会卡决策站已启动: http://localhost:${port}`);
   console.log(`SellerSprite MCP: ${sellerSpriteSecret ? "已配置密钥" : "未配置密钥，前端将保留演示模式"}`);
   console.log(`AI 分析模型: ${analyzeApiKey ? `${analyzeModel} 已配置` : "未配置 ANALYZE_API_KEY，机会卡将使用演示模式"}`);
