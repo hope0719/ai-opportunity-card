@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" role="img" aria-labelledby="title desc">
+  <title id="title">Organizer size map</title>
+  <desc id="desc">A dimension map showing outside size and inner pocket width.</desc>
+  <rect width="360" height="240" fill="#eef4f1"/>
+  <rect x="58" y="50" width="244" height="132" rx="18" fill="#ffffff" stroke="#c7ddd6" stroke-width="4"/>
+  <rect x="88" y="82" width="82" height="70" rx="12" fill="#dcebe6" stroke="#87b8ac" stroke-width="3"/>
+  <rect x="190" y="82" width="82" height="70" rx="12" fill="#dcebe6" stroke="#87b8ac" stroke-width="3"/>
+  <path d="M58 30h244M58 30v12M302 30v12M36 50v132M36 50h12M36 182h12" stroke="#16836f" stroke-width="4" stroke-linecap="round"/>
+  <text x="132" y="25" fill="#24443e" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="800">10.8 in</text>
+  <text x="4" y="122" fill="#24443e" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="800" transform="rotate(-90 16 122)">8 in</text>
+  <text x="98" y="170" fill="#24443e" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="800">adapter</text>
+  <text x="196" y="170" fill="#24443e" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="800">tablet</text>
+  <text x="100" y="218" fill="#24443e" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="800">REAL SIZE MAP</text>
+</svg>

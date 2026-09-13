@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" role="img" aria-labelledby="title desc">
+  <title id="title">Cable anti-drop shake test</title>
+  <desc id="desc">A cable organizer tilted upside down while cables remain secured.</desc>
+  <rect width="360" height="240" fill="#eef4f1"/>
+  <g transform="translate(180 112) rotate(-12) translate(-180 -112)">
+    <rect x="56" y="48" width="248" height="128" rx="18" fill="#ffffff" stroke="#c7ddd6" stroke-width="4"/>
+    <rect x="80" y="72" width="200" height="80" rx="12" fill="#dcebe6"/>
+    <path d="M98 112c26-26 52 26 78 0s52 26 78 0" fill="none" stroke="#16836f" stroke-width="9" stroke-linecap="round"/>
+    <path d="M92 86h176M92 140h176" stroke="#87b8ac" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <path d="M80 38c-20 6-34 20-42 40M280 202c22-7 37-22 44-44" fill="none" stroke="#16836f" stroke-width="6" stroke-linecap="round"/>
+  <text x="86" y="220" fill="#24443e" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="800">ANTI-DROP SHAKE TEST</text>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">
+  <title id="title">Travel cable organizer fit test</title>
+  <desc id="desc">A water resistant electronics organizer shown with charger, tablet and cables inside.</desc>
+  <rect width="640" height="420" fill="#eef4f1"/>
+  <rect x="44" y="42" width="552" height="336" rx="26" fill="#ffffff" stroke="#c7ddd6" stroke-width="4"/>
+  <rect x="74" y="78" width="492" height="254" rx="20" fill="#dcebe6"/>
+  <path d="M96 120h448M96 204h448M96 288h448" stroke="#b6d1ca" stroke-width="3"/>
+  <rect x="112" y="100" width="124" height="80" rx="14" fill="#f9fbfb" stroke="#87b8ac" stroke-width="3"/>
+  <rect x="256" y="96" width="180" height="112" rx="16" fill="#1f3a35"/>
+  <rect x="272" y="112" width="148" height="82" rx="10" fill="#eef4f1"/>
+  <rect x="458" y="106" width="72" height="98" rx="14" fill="#f7faf9" stroke="#87b8ac" stroke-width="3"/>
+  <circle cx="494" cy="134" r="8" fill="#16836f"/>
+  <path d="M136 256c46-40 92 40 138 0s92 40 138 0 70 12 96 32" fill="none" stroke="#16836f" stroke-width="10" stroke-linecap="round"/>
+  <rect x="96" y="344" width="448" height="12" rx="6" fill="#16836f"/>
+  <g fill="#24443e" font-family="Arial, Helvetica, sans-serif" font-weight="800">
+    <text x="112" y="154" font-size="22">ADAPTER</text>
+    <text x="286" y="166" font-size="24">TABLET</text>
+    <text x="452" y="244" font-size="18">REAL FIT TEST</text>
+  </g>
+</svg>
