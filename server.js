@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { generateLocalAnalysis } from "./local-engine.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 loadLocalEnv();
@@ -419,14 +420,6 @@ function extractJson(text) {
 }
 
 async function handleAnalyze(req, res) {
-  if (!analyzeApiKey) {
-    sendJson(res, 503, {
-      ok: false,
-      code: "MISSING_ANALYZE_KEY",
-      message: "未配置 ANALYZE_API_KEY，AI 实时分析不可用，前端将使用演示模式。"
-    });
-    return;
-  }
   const body = await readJson(req);
   const evidence = String(body.evidence || "").trim();
   if (evidence.length < 10) {
@@ -434,6 +427,20 @@ async function handleAnalyze(req, res) {
     return;
   }
   const context = body.context && typeof body.context === "object" ? body.context : {};
+
+  // 免密钥模式：未配置大模型或显式指定 ANALYZE_ENGINE=local 时，直接用本地引擎出卡
+  const forceLocal = process.env.ANALYZE_ENGINE === "local";
+  if (!analyzeApiKey || forceLocal) {
+    const analysis = generateLocalAnalysis(evidence, context, body.retryNote);
+    sendJson(res, 200, {
+      ok: true,
+      engine: "local",
+      model: "local-engine",
+      analysis
+    });
+    return;
+  }
+
   const userPrompt = [
     `产品线索：来源=${context.source || "未知"}；标题=${context.title || "未命名"}；热度/元信息=${context.meta || "无"}。`,
     context.asin ? `Amazon ASIN：${context.asin}（站点 ${context.marketplace || "US"}）。` : "",
@@ -446,10 +453,17 @@ async function handleAnalyze(req, res) {
       { role: "system", content: ANALYZE_SYSTEM_PROMPT },
       { role: "user", content: userPrompt }
     ]);
-    sendJson(res, 200, { ok: true, model: analyzeModel, analysis });
+    sendJson(res, 200, { ok: true, engine: "llm", model: analyzeModel, analysis });
   } catch (error) {
-    const cause = error.cause?.code || error.cause?.message || error.cause;
-    sendJson(res, 502, { ok: false, code: "ANALYZE_FAILED", message: error.message, ...(cause ? { cause: String(cause) } : {}) });
+    // 大模型调用失败时降级到本地引擎，保证 API 永远能出卡
+    const analysis = generateLocalAnalysis(evidence, context, body.retryNote);
+    sendJson(res, 200, {
+      ok: true,
+      engine: "local-fallback",
+      model: "local-engine",
+      analysis,
+      llmError: error.message
+    });
   }
 }
 
@@ -479,6 +493,7 @@ const server = http.createServer(async (req, res) => {
         sellerSpriteMode: preferSellerSpriteMcp ? "mcp" : "api",
         mcpUrl: sellerSpriteMcpUrl.replace(/\?.*$/, ""),
         analyzeConfigured: Boolean(analyzeApiKey),
+        analyzeEngine: process.env.ANALYZE_ENGINE === "local" ? "local" : analyzeApiKey ? "llm" : "local",
         analyzeModel
       });
       return;
@@ -507,6 +522,6 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(port, "0.0.0.0", () => {
   console.log(`AI 选品机会卡决策站已启动: http://localhost:${port}`);
-  console.log(`SellerSprite MCP: ${sellerSpriteSecret ? "已配置密钥" : "未配置密钥，前端将保留演示模式"}`);
-  console.log(`AI 分析模型: ${analyzeApiKey ? `${analyzeModel} 已配置` : "未配置 ANALYZE_API_KEY，机会卡将使用演示模式"}`);
+  console.log(`SellerSprite MCP: ${sellerSpriteSecret ? "已配置密钥，可拉取真实评论" : "未配置密钥，评论区使用预置演示数据"}`);
+  console.log(`分析引擎: ${process.env.ANALYZE_ENGINE === "local" ? "本地引擎（强制，ANALYZE_ENGINE=local）" : analyzeApiKey ? `${analyzeModel}（失败时自动降级本地引擎）` : "本地引擎（免密钥模式，未配置 ANALYZE_API_KEY）"}`);
 });

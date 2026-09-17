@@ -72,6 +72,7 @@ function generateLocalAnalysis(evidence, context, retryNote) {
 
   let score, confidence, decision;
   if (hasRetry) { score = 74; confidence = 72; decision = "小样验证"; }
+  else if (hasPains && !hasEnough) { score = 72; confidence = 66; decision = "小样验证"; }
   else if (!hasEnough) { score = 52; confidence = 48; decision = "暂缓"; }
   else if (hasPains && pains.length >= 2) { score = 82 + Math.min(8, pains.length * 2); confidence = 84 + Math.min(10, pains.length * 2); decision = "小样验证"; }
   else if (hasPains) { score = 76; confidence = 78; decision = "小样验证"; }

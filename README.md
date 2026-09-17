@@ -1,62 +1,121 @@
-# AI 选品机会卡决策站
+# AI 选品机会卡（Opportunity Card）
 
-这是生财黑客松项目的独立演示站。当前版本已从「差评炼金」升级为「AI 选品机会卡」：保留评论/VOC 分析能力，但主叙事改为帮助老板判断一个产品方向是否值得继续做。
+> **别人看到爆款就跟卖，我们先看差评——把一条差评，变成一张能拍板、能派工的选品机会卡。**
 
-- `index.html`: 产品叙事与执行工作台
-- `styles.css`: 页面视觉与响应式布局
-- `app.js`: 案例切换、演示解析、AI 接力、机会卡重算与执行派工
-- `server.js`: 本地 SellerSprite MCP/API 代理 + LLM 机会卡分析代理，负责保存密钥并转发请求
-- `sellersprite-mcp.example.json`: Codex/其他 MCP 客户端可参考的卖家精灵配置
+**在线演示（免安装，直接体验）**：
+👉 **https://hope0719.github.io/opportunity-card-station/**
 
-## 本地启动
+GitHub Pages 版内置演示案例与本地分析引擎，无需任何配置即可跑完整流程。本仓库是**完整版**：支持本地运行、命令行出卡、作为 Agent 技能安装，并可选接入真实数据源。
 
-不要把真实密钥写进前端或提交进项目。启动时用环境变量传入：
+---
+
+## 它解决什么问题
+
+跨境卖家看到国内爆款（小红书/抖音/1688），第一反应是跟卖——但海外用户买不买账，没人知道。赌错一次，几万块打水漂。
+
+**AI 选品机会卡**用海外真实差评验证国内爆款信号，几秒钟输出一张老板能看懂的卡：
+
+| 输出 | 说明 |
+|---|---|
+| 综合评分 | 0–100，≥75 值得推进（绿）/ 55–74 谨慎（黄）/ <55 不建议（红） |
+| 证据强度 | 支撑这个结论的证据可信度百分比 |
+| 四选一决策 | **继续 / 暂缓 / 放弃 / 小样验证**——不给模糊答案 |
+| 机会标题 | 一句话说清"什么产品方向 + 什么结论" |
+| 核心洞察 | 国内内容在卖什么 vs 海外用户真正付费的是什么 |
+| 行动项 ×3 | 可勾选执行：产品 / 利润 / 验证 / 内容 / 供应链 |
+| 风险提醒 ×3 | 业务大脑视角，指出老板最容易踩的坑 |
+
+## 三种使用方式（全部免密钥开箱即用）
+
+### ① 命令行出卡（最快，一条命令）
 
 ```bash
-SELLERSPRITE_SECRET_KEY=你的密钥 ANALYZE_API_KEY=你的LLM密钥 npm run dev
+node analyze.js --evidence "口袋比图片看起来小，标准充电头和平板都放不进去，拉链用了两次就卡住了。" --title "旅行数码收纳包" --source "小红书爆款"
 ```
 
-也可以在本目录创建 `.env.local`，服务端会自动读取：
+输出：
+
+```
+┌─────────────── 选品机会卡 ───────────────
+│ 综合评分：86 / 100    证据强度：88%
+│ 决策结论：小样验证
+│ 机会标题：拉链耐用性 + 口袋尺寸真实度：小样验证（旅行数码收纳包）
+│ 行动项：
+│   [产品] 升级 YKK 顺滑拉链，展示线材防掉测试。
+│   [验证] 先测 20 个样品，观察拉链投诉是否下降。
+│   ...
+└───────────────────────────────────────────
+```
+
+更多：`--json` 输出 JSON，`--retry "老板反馈"` 触发降权重算，`node analyze.js --help` 查看全部选项。要求 Node ≥ 18，**无任何 npm 依赖**。
+
+### ② 本地完整工作台（网页版）
 
 ```bash
-SELLERSPRITE_SECRET_KEY=你的密钥
-ANALYZE_API_KEY=你的LLM密钥
-ANALYZE_MODEL=step-3.7-flash            # 可选，默认 step-3.7-flash
-ANALYZE_API_URL=https://api.stepfun.com/step_plan/v1/chat/completions  # 可选
+node server.js
+# 打开 http://localhost:5179
 ```
 
-也可以传完整 MCP 地址，服务会自动提取 `secret-key` 并清洗 URL：
+完整流程：产品线索 + 评论证据 → 4 个 Agent 接力分析 → 机会卡生成 → 老板编辑/勾选行动项 → 确认派工 → 执行队列（供应链询价 / 竞品审核 / Listing 草稿，含 1688/Amazon/TikTok 真实工作页入口）。
 
-```bash
-SELLERSPRITE_MCP_URL="https://mcp.sellersprite.com/mcp?secret-key=你的密钥" npm run dev
+### ③ 作为 Agent 技能安装
+
+把整个仓库复制到你的 Agent 技能目录（如 WorkBuddy：`~/.workbuddy/skills/opportunity-card/`；Claude Code：`~/.claude/skills/`）。Agent 读取 `SKILL.md` 后即可直接调 CLI 出卡或帮你启动工作台——**不需要接入任何大模型**。
+
+## 数据接入点指南（在哪接、接什么、什么提升）
+
+**默认全部不接也能用**：内置本地分析引擎（15+ 痛点关键词库，中英双语识别拉链/容量/口袋/防水/锁扣/噪音/清洗等）+ 预置演示案例。以下按性价比排序：
+
+### 接入点 1：真实亚马逊评论 ⭐⭐⭐（性价比最高）
+
+- **在哪接**：仓库根目录创建 `.env.local`（参照 `.env.example`），写入 `SELLERSPRITE_SECRET_KEY=你的密钥`
+- **带来什么**：网页版「拉取真实评论」按钮激活——输入任意 ASIN 实时拉取该商品真实差评，自动清洗后填入证据区
+- 也可通过 API 调用：`POST /api/sellersprite/review`，参数 `{ "asin": "B0XXXXXXXX", "marketplace": "US", "starList": [1,2] }`
+
+### 接入点 2：大模型分析引擎 ⭐⭐（质量增强）
+
+- **在哪接**：`.env.local` 写入 `ANALYZE_API_KEY` / `ANALYZE_API_URL` / `ANALYZE_MODEL`（任何 OpenAI 兼容接口均可）
+- **带来什么**：分析从规则引擎升级为 LLM 实时推理，洞察更贴合语境、能覆盖规则库之外的品类；LLM 失败时**自动降级回本地引擎，服务永不断**
+- 强制不用大模型：`ANALYZE_ENGINE=local node server.js`
+
+### 接入点 3：国内爆款信号源 ⭐（进阶）
+
+- **在哪接**：任何能产出「差评/诉求文本」的解析服务，输出直接填入证据区（网页版）或 `--evidence` 参数（CLI）；服务端可仿照 sellersprite 路由扩展 `/api/parse` 端点
+- **带来什么**：从手动贴差评升级为贴一个笔记链接自动解析
+
+### 接入点 4：执行层真实入口（免配置）
+
+- 网页版执行队列已内置 1688 询价、Amazon 竞品、TikTok 内容的真实工作页外链，机会卡确认后一键跳转，闭环「决策 → 执行」
+
+## API 一览（服务启动后）
+
+| 端点 | 方法 | 说明 |
+|---|---|---|
+| `/api/health` | GET | 各数据源配置状态（agent 可据此判断当前模式） |
+| `/api/analyze` | POST | 出机会卡：`{ evidence, context: { source, title, meta }, retryNote? }` → `{ ok, engine, model, analysis }` |
+| `/api/sellersprite/review` | POST | 拉真实评论（需配置卖家精灵密钥） |
+| `/api/sellersprite/mcp-call` | POST | 卖家精灵 MCP 通用调用 |
+
+## 文件结构
+
+```
+SKILL.md              Agent 技能定义（安装即用）
+analyze.js            命令行出卡工具（零依赖、零密钥）
+local-engine.js       本地分析引擎（规则库 + 评分逻辑，零依赖）
+server.js             本地服务（网页托管 + API + 密钥代理）
+index.html / app.js / styles.css   网页版界面
+offline.html          纯离线单文件版（可 file:// 双击打开）
+images/               演示案例产品图
+.env.example          环境变量模板（各接入点说明）
+sellersprite-mcp.example.json      MCP 客户端参考配置
 ```
 
-打开 `http://localhost:5179`。
+## 安全说明
 
-## 已接入能力
+- `.env.local` 存放密钥，已被 `.gitignore` 排除，**永远不会被提交或分发**
+- 密钥只在本机 `server.js` 内使用，前端与公开页面不接触任何密钥
+- 未配置密钥时，页面与 API 明确提示当前为本地引擎/演示数据模式，不会把演示数据误当真实数据
 
-### 真实 AI 机会卡分析（本次新增）
+## 背景
 
-- 点击「生成选品机会卡」后，前端调用 `POST /api/analyze`，由服务端转发给大模型（默认阶跃星辰 `step-3.7-flash`）
-- LLM 基于评论证据实时输出结构化 JSON：评分（0-100）、证据强度、四选一决策（继续/暂缓/放弃/小样验证）、机会标题、核心洞察、3 条行动项、3 条风险提醒
-- 前端动态渲染决策卡：评分徽章按分数变色（≥75 绿 / 55-74 黄 / <55 红），行动项可直接勾选后派工
-- 「退回重算」会把老板的反馈附带给 LLM 重新生成结论
-- 未配置 `ANALYZE_API_KEY` 或调用失败时，自动降级为演示数据，页面徽章显示「演示模式」/「AI 实时分析 · 模型名」
-- 服务端对出站请求做了 keep-alive 断连自动重试（最多 3 次），应对代理/长连接波动
-
-### 卖家精灵真实评论
-
-- 前端点击"拉取真实评论"会请求本地 `/api/sellersprite/review`
-- 本地服务优先调用卖家精灵官方 API `/v1/review`
-- 如果官方 API 调用失败，会降级调用卖家精灵 MCP 工具 `review`
-- 如果未配置密钥、接口失败或筛选无评论，页面会明确报错并保留已有输入，避免把演示数据误当真实数据
-- 评论分析现在作为机会卡的证据来源之一，最终输出强调「继续 / 暂缓 / 放弃 / 小样验证」的选品决策
-
-产品线索入口为 Amazon ASIN（真实评论拉取）+ 评论证据文本区（可直接编辑，作为 AI 机会卡分析输入）。
-
-## 评论接口依据
-
-- 官方评论 API：`POST https://api.sellersprite.com/v1/review`
-- 必填参数：`marketplace`、`asin`
-- 可选参数：`starList`、`typeList`、`page`、`size`
-- `size` 最大 10；密钥必须放在固定 header `secret-key`
+本项目为生财有术黑客松参赛作品（晋级 16 强），从早期「差评炼金」评论分析迭代为「AI 选品机会卡」选品决策工作台。演示版（GitHub Pages 静态站）见文首链接。
